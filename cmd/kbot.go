@@ -14,7 +14,9 @@ import (
 )
 
 // TeleToken bot
-var TeleToken = os.Getenv("TELE_TOKEN")
+var (
+	TeleToken = os.Getenv("TELE_TOKEN")
+)
 
 
 
@@ -48,7 +50,7 @@ to quickly create a Cobra application.`,
 		//If everything goes smoothly, the bot is ready to receive and respond to messages.
 
 		if err != nil {
-			log.Fatalf("Please check TELE_TOKEN ENV VARIABLE. %S", err)
+			log.Fatalf("Please check TELE_TOKEN ENV VARIABLE. %s", err)
 			return
 		}
 
@@ -57,12 +59,20 @@ to quickly create a Cobra application.`,
 		kbot.Handle(telebot.OnText, func(m telebot.Context) error {
 
 			log.Print(m.Message().Payload, m.Text())
+			//This line of code assigns the payload of the received message to the payload variable.
+			payload := m.Message().Payload
+			//This is a switch statement that checks the value of the payload variable.
+			//If the payload is "hello", the bot sends a message using the m.Send() method that greets the user and includes the appVersion variable.
+			switch payload {
+			case "hello":
+				err = m.Send(fmt.Sprintf("Hello I'm KBot %s!", appVersion))
+			}
+			//This line of code returns any errors that occurred during the handling of the message.
 			return err
 		})
 
-		//kbot.Handle(telebot.On("/hello", func(c tele.Context) error {
-		//	return c.Send("Hello!")
-
+		
+		//These lines of code start the bot's message polling loop and begin listening for incoming messages.
 		kbot.Start()
 
 	},
