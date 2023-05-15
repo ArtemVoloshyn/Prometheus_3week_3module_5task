@@ -4,7 +4,8 @@ WORKDIR /go/src/app
 #will copy output code to the build contex
 COPY . .
 ARG TARGETARCH
-RUN make build TARGETARCH=amd64
+ARG TARGETOS
+RUN make build TARGETARCH=$TARGETARCH TARGETOS=$TARGETOS
 
 #TARGETARCH=$TARGETARCH
 

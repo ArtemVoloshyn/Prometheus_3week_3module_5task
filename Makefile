@@ -1,6 +1,6 @@
 # In general the purpose of this file is to get known the rules of how to correctly build project and for building automation process. 
 APP := $(shell basename $(shell git remote get-url origin))
-REGISTRY := artemvoloshyn
+REGISTRY := voloshynartem
 REGISTRY_DOCKERHUB := tellllo
 
 VERSION=$(shell git describe --tags --abbrev=0)-$(shell git rev-parse --short HEAD) 
@@ -35,7 +35,7 @@ build: format get
 #command for automation deleting  files that already don't needed. Like binary file of code after building doesn't need in commits history.
 
 image:
-	docker buildx build . -t ${REGISTRY}/${APP}:${VERSION} --platform=linux/amd64 --build-arg TARGETARCH=amd64
+	docker build . -t ${REGISTRY}/${APP}:${VERSION} --build-arg TARGETARCH=${TARGETARCH} --build-arg TARGETOS=${TARGETOS} 
 
 
 push:

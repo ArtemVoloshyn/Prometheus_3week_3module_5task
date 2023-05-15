@@ -1,4 +1,4 @@
-module github.com/Prometheus_2week_2module_5task
+	module github.com/Prometheus_2week_2module_5task
 
 go 1.20
 
