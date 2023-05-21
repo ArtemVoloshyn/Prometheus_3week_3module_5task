@@ -1,11 +1,17 @@
 # In general the purpose of this file is to get known the rules of how to correctly build project and for building automation process. 
+# Make is a build automation tool used to manage the compilation and building of software projects. 
+# It reads a Makefile, a file that specifies how to derive the target output files from source files, and executes the necessary commands to build the project.
+
+
 APP := $(shell basename $(shell git remote get-url origin))
 REGISTRY := voloshynartem
-REGISTRY_DOCKERHUB := tellllo
 
-VERSION=$(shell git describe --tags --abbrev=0)-$(shell git rev-parse --short HEAD) 
-TARGETOS=linux #linux darwin windows
-TARGETARCH=amd64 #amd64
+VERSION=$(shell echo -n $(shell git describe --tags --abbrev=0)-$(shell git rev-parse --short HEAD))
+#$(shell git describe --tags --abbrev=0)-$(shell git rev-parse --short HEAD) 
+
+TARGETOS=linux
+#linux darwin windows
+TARGETARCH=amd64 	
 
 # TARGETOS
 # first word is the option of make command, and called like target parameter of makefile  
@@ -30,18 +36,70 @@ get:
 # added variables like GOOS and GOARCH.
 
 build: format get
-	CGO_ENABLED=0 GOOS=$(TARGETOS) GOARCH=$(TARGETARCH) go build -v -o kbot -ldflags "-X="github.com/Prometheus_3week_3module_5task/cmd.appVersion={VERSION}
+	CGO_ENABLED=0 GOOS=$(TARGETOS) GOARCH=$(TARGETARCH) go build -v -o kbot -ldflags "-X="github.com/Prometheus_2week_2module_5task/cmd.appVersion=${VERSION}
 
 #command for automation deleting  files that already don't needed. Like binary file of code after building doesn't need in commits history.
 
 image:
-	docker build . -t ${REGISTRY}/${APP}:${VERSION} --build-arg TARGETARCH=${TARGETARCH} --build-arg TARGETOS=${TARGETOS} 
+	docker build . -t ${REGISTRY}/${APP}:${VERSION}-${TARGETARCH}-${TARGETOS} 
+
+# --build-arg TARGETARCH=${TARGETARCH} --build-arg TARGETOS=${TARGETOS} 
 
 
-push:
-	docker push ${REGISTRY}/${APP}:${VERSION}
+docker_login:
+	docker login -u ${REGISTRY}
+
+push_docker_hub: docker_login
+	docker push ${REGISTRY}/${APP}:${VERSION}-${TARGETARCH}-${TARGETOS} 
 
 
+################################1task#####
+
+# targets with the name of OS are used to build app by go compiler 
+# for different OS and architecture by predefining the OS and architecture parameter
+# ?the command is instructing the build system to use the appropriate make command (represented by ${MAKE})
+# to execute the build process targeting the Linux operating system and the x86-64 architecture.?
+linux:
+	${MAKE} build TARGETOS=linux TARGETARCH=amd64
+
+arm:
+	${MAKE} build TARGETOS=linux TARGETARCH=arm64
+
+macOS:
+	${MAKE} build TARGETOS=darwin TARGETARCH=arm64
+
+windows :
+	${MAKE} build TARGETOS=windws TARGETOS=amd64
+
+
+####################2 task#####
+
+# targets with the name of OS are used to build docker image with go compiler inside
+# for different OS and architecture by predefining the OS and architecture parameter
+image_linux: image
+	TARGETOS=linux TARGETARCH=amd64
+image_arm :
+image_macOS :
+image_windows :
+
+
+
+################3 task########
+gcloud_login:
+	docker login -u oauth2accesstoken -p "$(gcloud auth print-access-token)" https://gcr.io 
+	
+
+push_gcloud: gcloud_login
+	docker push ${REGISTRY}/${APP}:${VERSION}-${TARGETARCH}-${TARGETOS} 
+
+
+
+
+############################4 task #####
+#add cleaner for cleaning docker images by tags
 
 clean:
+	docker rmi ${REGISTRY}/${APP}:${VERSION}-${TARGETARCH}-${TARGETOS} 
+
+clean.all: clean
 	rm -rf kbot

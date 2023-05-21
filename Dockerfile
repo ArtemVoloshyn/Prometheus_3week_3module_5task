@@ -1,10 +1,11 @@
+#putting the go compiler inside container for building process  
 FROM quay.io/projectquay/golang:1.20 as builder
 
 WORKDIR /go/src/app
 #will copy output code to the build contex
 COPY . .
-ARG TARGETARCH
-ARG TARGETOS
+#ARG TARGETARCH
+#ARG TARGETOS
 RUN make build TARGETARCH=$TARGETARCH TARGETOS=$TARGETOS
 
 #TARGETARCH=$TARGETARCH
