@@ -9,9 +9,9 @@ REGISTRY := voloshynartem
 VERSION=$(shell echo -n $(shell git describe --tags --abbrev=0)-$(shell git rev-parse --short HEAD))
 #$(shell git describe --tags --abbrev=0)-$(shell git rev-parse --short HEAD) 
 
-TARGETOS=linux
+#TARGETOS=linux
 #linux darwin windows
-TARGETARCH=amd64 	
+#TARGETARCH=amd64 	
 
 # TARGETOS
 # first word is the option of make command, and called like target parameter of makefile  
@@ -41,10 +41,7 @@ build: format get
 #command for automation deleting  files that already don't needed. Like binary file of code after building doesn't need in commits history.
 
 image:
-	docker build . -t ${REGISTRY}/${APP}:${VERSION}-${TARGETARCH}-${TARGETOS} 
-
-# --build-arg TARGETARCH=${TARGETARCH} --build-arg TARGETOS=${TARGETOS} 
-
+	docker build . -t ${REGISTRY}/${APP}:${VERSION}-${TARGETARCH}-${TARGETOS} --build-arg TARGETARCH=${TARGETARCH} --build-arg TARGETOS=${TARGETOS} 
 
 docker_login:
 	docker login -u ${REGISTRY}
@@ -53,7 +50,7 @@ push_docker_hub: docker_login
 	docker push ${REGISTRY}/${APP}:${VERSION}-${TARGETARCH}-${TARGETOS} 
 
 
-################################1task#####
+################################1task - building GO execution program file #####
 
 # targets with the name of OS are used to build app by go compiler 
 # for different OS and architecture by predefining the OS and architecture parameter
@@ -68,23 +65,25 @@ arm:
 macOS:
 	${MAKE} build TARGETOS=darwin TARGETARCH=arm64
 
-windows :
+windows:
 	${MAKE} build TARGETOS=windws TARGETOS=amd64
 
 
-####################2 task#####
+####################2 task - building docker image   #####
 
 # targets with the name of OS are used to build docker image with go compiler inside
 # for different OS and architecture by predefining the OS and architecture parameter
 image_linux: image
 	TARGETOS=linux TARGETARCH=amd64
-image_arm :
-image_macOS :
-image_windows :
+image_arm : image
+	TARGETOS=linux TARGETARCH=arm64
+image_macOS : image
+	TARGETOS=darwin TARGETARCH=arm64
+image_windows : image
+	TARGETOS=windws TARGETOS=amd64
 
 
-
-################3 task########
+################commands for authorization in containers registry########
 gcloud_login:
 	docker login -u oauth2accesstoken -p "$(gcloud auth print-access-token)" https://gcr.io 
 	
@@ -95,11 +94,11 @@ push_gcloud: gcloud_login
 
 
 
-############################4 task #####
-#add cleaner for cleaning docker images by tags
+############################3 task - clearing #####
+#add cleaner for cleaning docker images by tags and GO executable task
 
 clean:
 	docker rmi ${REGISTRY}/${APP}:${VERSION}-${TARGETARCH}-${TARGETOS} 
 
-clean.all: clean
+clean.all: 
 	rm -rf kbot
