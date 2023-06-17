@@ -9,9 +9,9 @@ REGISTRY := voloshynartem
 VERSION=$(shell echo -n $(shell git describe --tags --abbrev=0)-$(shell git rev-parse --short HEAD))
 #$(shell git describe --tags --abbrev=0)-$(shell git rev-parse --short HEAD) 
 
-TARGETOS=linux
+#TARGETOS=linux
 #linux darwin windows
-TARGETARCH=amd64 	
+#TARGETARCH=amd64 	
 
 # TARGETOS
 # first word is the option of make command, and called like target parameter of makefile  
